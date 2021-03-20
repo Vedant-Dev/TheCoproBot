@@ -1,15 +1,11 @@
 from bot import TelegramBot as Bot
-import bs4
-import requests
-import re
-import json
-from components import Message
+from components import Message, BotCommand
 
 bot = Bot(config='config.py')
 
 def send_reply(message):
 	if not message:
-		return 'Message to aaya hi nahi'
+		return 'Due to some problem I was not able to read your message! Please try again'
 	if message.animation is not None:
 		return 'U send a animation'
 	if message.audio is not None:
@@ -22,17 +18,12 @@ def send_reply(message):
 		return 'u send a sticker'
 	if message.photo is not None:
 		return 'u send a photo'
-	return gangsterize(message.text)
-def gangsterize(input_text):
-	params = {"translatetext": input_text}
-	target_url = "http://www.gizoogle.net/textilizer.php"
-	resp = requests.post(target_url, data=params)
-	# the html returned is in poor form normally.
-	soup_input = re.sub("/name=translatetext[^>]*>/", 'name="translatetext" >', resp.text)
-	soup = bs4.BeautifulSoup(soup_input, "lxml")
-	giz = soup.find_all(text=True)
-	giz_text = giz[37].strip("\r\n")  # Hacky, but consistent.
-	return giz_text
+	return message.text
+def execute_command(bot_command):
+	if bot_command.command == '/meme':
+		bot.sendTextMessage(message= f'Meme chaiye bsdke',chat_id=message.from_.id)
+	elif bot_command.command == '/do':
+		bot.sendTextMessage(message= f'kaam krtwa reh din bhar',chat_id=message.from_.id)
 
 update_id = -1
 while True:
@@ -43,8 +34,16 @@ while True:
 			update_id = item['update_id']
 			if 'message' in item:
 				message = Message(**item['message'],from_=item['message']['from'])
-				bot.sendTextMessage(message=send_reply(message),chat_id=message.from_.id)
+				if 'entities' in item['message']:
+					if item['message']['entities'][0]['type'] == 'bot_command':
+						bot_command = BotCommand(command=message.text[item['message']['entities'][0]['offset']:item['message']['entities'][0]['length']], discription=message.text[item['message']['entities'][0]['length']:])
+						execute_command(bot_command)
+					else:
+						bot.sendTextMessage(message=send_reply(message),chat_id=message.from_.id)
+				else:
+					bot.sendTextMessage(message=send_reply(message),chat_id=message.from_.id)
+				
 			else:
 				message = Message(**item['edited_message'],from_=item['edited_message']['from'])
-				bot.sendTextMessage(message=send_reply(message),chat_id=message.from_.id,reply_to_message_id=message.message_id)
+				bot.sendPhotoMessage(photo='https://core.telegram.org/file/811140015/1734/8VZFkwWXalM.97872/6127fa62d8a0bf2b3c',chat_id=message.from_.id,reply_to_message_id=message.message_id)
 
