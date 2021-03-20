@@ -5,6 +5,7 @@ import re
 
 bot = Bot(config='config.py')
 
+
 def send_reply(message):
 	if not message:
 		return 'Message to aaya hi nahi'
