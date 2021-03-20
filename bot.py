@@ -1,6 +1,7 @@
 import requests
 import json
 from configparser import ConfigParser
+from components import Message
 class TelegramBot():
 	def __init__(self, config):
 		self.bot_token = self.unpack_config(config=config)
@@ -13,12 +14,14 @@ class TelegramBot():
 		response = requests.get(url)
 		return json.loads(response.text)
 	
-	def sendMessage(self, message, chat_id):
+	def sendTextMessage(self, message, chat_id, reply_to_message_id=None):
 		if not message:
 			return 'unpassed parameter message'
 		if not chat_id:
 			return 'unpassed parameter chat_id'
 		url = self.base + f'sendMessage?text={message}&chat_id={chat_id}'
+		if reply_to_message_id:
+			url = url + f'&reply_to_message_id={reply_to_message_id}'
 		message = requests.get(url)
 		return json.loads(message.text)
 	def unpack_config(self, config):
