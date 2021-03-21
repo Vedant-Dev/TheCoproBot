@@ -1,6 +1,6 @@
 from bot import TelegramBot as Bot
 from components import Message, BotCommand
-
+from meme import give_me_meme
 bot = Bot(config='config.py')
 
 def send_reply(message):
@@ -21,7 +21,9 @@ def send_reply(message):
 	return message.text
 def execute_command(bot_command):
 	if bot_command.command == '/meme':
-		bot.sendTextMessage(message= f'Meme chaiye bsdke',chat_id=message.from_.id)
+		memes = give_me_meme(bot_command.discription)
+		for meme in memes:
+			bot.sendPhotoMessage(meme,chat_id=message.from_.id)
 	elif bot_command.command == '/do':
 		bot.sendTextMessage(message= f'kaam krtwa reh din bhar',chat_id=message.from_.id)
 
